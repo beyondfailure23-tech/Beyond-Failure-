@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F0F4FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Beyond Failure">
+<link rel="manifest" href="manifest.json">
+<title>Beyond Failure — CA Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #F0F4FF;
+  --bg2: #E8EEFF;
+  --white: #FFFFFF;
+  --text: #0D1B3E;
+  --muted: #6B7A99;
+  --border: #DDE3F0;
+  --shadow: 0 2px 16px rgba(13,27,62,0.08);
+  --shadow-lg: 0 8px 32px rgba(13,27,62,0.13);
+
+  --foundation: #22C55E;
+  --foundation-bg: #F0FDF4;
+  --foundation-border: #BBF7D0;
+  --foundation-dim: rgba(34,197,94,0.12);
+
+  --inter: #3B82F6;
+  --inter-bg: #EFF6FF;
+  --inter-border: #BFDBFE;
+  --inter-dim: rgba(59,130,246,0.12);
+
+  --final: #8B5CF6;
+  --final-bg: #F5F3FF;
+  --final-border: #DDD6FE;
+  --final-dim: rgba(139,92,246,0.12);
+
+  --nav-h: 68px;
+  --header-h: 60px;
+  --font-head: 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── APP SHELL ── */
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  background: var(--bg);
+}
+.screen.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.screen.slide-out { opacity: 0; transform: translateX(-30px); pointer-events: none; }
+
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding-bottom: calc(var(--nav-h) + 16px);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── HEADER ── */
+.app-header {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(240,244,255,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; z-index: 10; position: relative;
+}
+.header-back {
+  width: 38px; height: 38px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.header-back:active { transform: scale(0.9); }
+.header-title {
+  font-family: var(--font-body); font-size: 16px; font-weight: 700;
+  color: var(--text); flex: 1; text-align: center;
+}
+.header-spacer { width: 38px; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  height: var(--nav-h);
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(13,27,62,0.07);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; cursor: pointer; padding: 8px 0;
+  transition: all 0.2s;
+}
+.nav-icon { font-size: 22px; }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
+.nav-item.active .nav-label { color: var(--inter); }
+
+/* ── HOME SCREEN ── */
+.home-header-bar {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(240,244,255,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* App Name */
+.app-name-wrap { display: flex; align-items: baseline; gap: 2px; }
+.app-name-beyond {
+  font-family: var(--font-body);
+  font-size: 22px; font-weight: 800;
+  color: #1D4ED8;
+  letter-spacing: -0.5px;
+}
+.app-name-failure {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px; font-weight: 700;
+  color: #0D1B3E;
+}
+
+.header-icons { display: flex; gap: 8px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.icon-btn:active { transform: scale(0.9); }
+
+/* Hero Banner */
+.hero-banner {
+  margin: 16px;
+  background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  overflow: hidden; position: relative;
+  box-shadow: 0 8px 24px rgba(29,78,216,0.3);
+}
+.hero-banner::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.hero-text-wrap { position: relative; z-index: 1; }
+.hero-greeting { font-size: 18px; font-weight: 700; color: white; margin-bottom: 4px; }
+.hero-sub { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 400; }
+.hero-emoji { font-size: 52px; position: relative; z-index: 1; }
+
+/* Tab Bar */
+.tab-bar {
+  display: flex; gap: 0;
+  margin: 0 16px 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+  box-shadow: var(--shadow);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 8px 4px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.tab-item.active { background: var(--bg2); }
+.tab-icon { font-size: 18px; }
+.tab-label { font-size: 10px; font-weight: 600; color: var(--muted); }
+.tab-item.active .tab-label { color: var(--inter); }
+
+/* Level Cards */
+.level-card {
+  margin: 0 16px 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex; align-items: center; gap: 16px;
+  position: relative; overflow: hidden;
+}
+.level-card:active { transform: scale(0.98); box-shadow: var(--shadow-lg); }
+.level-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; border-radius: 20px 20px 0 0;
+}
+.level-card.foundation::before { background: var(--foundation); }
+.level-card.inter::before { background: var(--inter); }
+.level-card.final::before { background: var(--final); }
+
+.level-icon-wrap {
+  width: 64px; height: 64px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+  overflow: hidden;
+}
+.level-info { flex: 1; min-width: 0; }
+.foundation .level-icon-wrap { background: var(--foundation-dim); }
+.inter .level-icon-wrap { background: var(--inter-dim); }
+.final .level-icon-wrap { background: var(--final-dim); }
+
+.level-info { flex: 1; }
+.level-badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 8px;
+  border-radius: 20px; margin-bottom: 6px;
+}
+.foundation .level-badge { background: var(--foundation-bg); color: var(--foundation); border: 1px solid var(--foundation-border); }
+.inter .level-badge { background: var(--inter-bg); color: var(--inter); border: 1px solid var(--inter-border); }
+.final .level-badge { background: var(--final-bg); color: var(--final); border: 1px solid var(--final-border); }
+
+.level-name { font-family: var(--font-body); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; word-break: break-word; }
+.level-desc { font-size: 12px; color: var(--muted); line-height: 1.4; word-break: break-word; }
+.level-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.level-count { font-size: 13px; font-weight: 600; color: var(--muted); }
+.level-count span { color: var(--text); }
+.level-arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.foundation .level-arrow { background: var(--foundation); }
+.inter .level-arrow { background: var(--inter); }
+.final .level-arrow { background: var(--final); }
+
+/* ── SUBJECTS SCREEN ── */
+.subject-card {
+  margin: 0 16px 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.subject-card:active { transform: scale(0.98); }
+.sub-num {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+  font-family: var(--font-head);
+}
+.sub-info { flex: 1; }
+.sub-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.sub-count { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.sub-chevron { font-size: 16px; color: var(--muted); }
+
+/* ── NOTES SCREEN ── */
+.notes-list { padding: 0 16px; }
+.note-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+  text-decoration: none;
+}
+.note-card:active { transform: scale(0.98); }
+.note-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; background: #FEF3C7;
+}
+.note-info { flex: 1; min-width: 0; }
+.note-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.note-desc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-arrow { font-size: 18px; color: var(--muted); flex-shrink: 0; }
+
+/* Loading & Empty */
+.loading-wrap { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; gap: 16px; }
+.spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--inter);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--muted); }
+
+.empty-wrap { text-align: center; padding: 60px 20px; }
+.empty-emoji { font-size: 48px; margin-bottom: 12px; }
+.empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── SEARCH SCREEN ── */
+.search-wrap { padding: 16px; }
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.search-box input {
+  flex: 1; border: none; outline: none; background: none;
+  font-family: var(--font-body); font-size: 15px; color: var(--text);
+}
+.search-box input::placeholder { color: var(--muted); }
+.search-icon { font-size: 18px; color: var(--muted); }
+
+/* ── ADMIN SCREEN ── */
+.admin-login-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 24px; gap: 20px;
+}
+.admin-icon-big { font-size: 56px; margin-bottom: 8px; }
+.admin-title { font-family: var(--font-head); font-size: 24px; font-weight: 700; color: var(--text); text-align: center; }
+.admin-sub { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.5; }
+
+.field-group { width: 100%; margin-bottom: 14px; }
+.field-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; display: block; }
+.field-input {
+  width: 100%; background: var(--white);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; color: var(--text);
+  font-family: var(--font-body); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus { border-color: var(--inter); }
+
+.btn-primary {
+  width: 100%; padding: 15px; border: none; border-radius: 14px;
+  color: white; font-family: var(--font-body); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+  margin-bottom: 10px;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+.btn-primary.blue { background: linear-gradient(135deg, #1D4ED8, #3B82F6); box-shadow: 0 4px 16px rgba(29,78,216,0.35); }
+.btn-primary.green { background: linear-gradient(135deg, #16A34A, #22C55E); box-shadow: 0 4px 16px rgba(22,163,74,0.35); }
+.btn-primary.red { background: linear-gradient(135deg, #DC2626, #EF4444); }
+.btn-secondary {
+  width: 100%; padding: 13px; border: 1.5px solid var(--border);
+  border-radius: 14px; background: var(--white);
+  color: var(--text); font-family: var(--font-body); font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-secondary:active { background: var(--bg2); }
+
+/* Admin Panel */
+.admin-panel-wrap { padding: 16px; }
+.admin-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 18px;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); cursor: pointer; transition: transform 0.2s;
+}
+.admin-card:active { transform: scale(0.98); }
+.admin-card-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.admin-card-info { flex: 1; }
+.admin-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.admin-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.admin-card-arrow { font-size: 18px; color: var(--muted); }
+
+.logout-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; border-radius: 14px; border: 1.5px solid #FECACA;
+  background: #FEF2F2; color: #DC2626; font-family: var(--font-body);
+  font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px;
+  transition: background 0.2s;
+}
+.logout-btn:active { background: #FEE2E2; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,27,62,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 500; display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: var(--white); border-radius: 24px 24px 0 0;
+  padding: 20px 20px 40px; width: 100%; max-width: 430px; margin: 0 auto;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+  border-top: 1px solid var(--border);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+
+/* ── TOAST ── */
+#toast-container {
+  position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%;
+  transform: translateX(-50%); z-index: 999; display: flex;
+  flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+}
+.toast {
+  padding: 10px 20px; border-radius: 100px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  animation: toastIn 0.3s ease forwards, toastOut 0.3s ease 2.3s forwards;
+  white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.toast.success { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+.toast.error { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+.toast.info { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+@keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+/* Section header */
+.section-pad { padding: 16px 16px 8px; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+
+/* All Notes screen filter */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--muted); font-family: var(--font-body);
+  font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  flex-shrink: 0; transition: all 0.2s;
+}
+.chip.active { background: var(--inter); border-color: var(--inter); color: white; }
+
+/* Select dropdown */
+.field-select {
+  width: 100%; background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; color: var(--text);
+  font-family: var(--font-body); font-size: 15px; outline: none; appearance: none;
+  -webkit-appearance: none;
+}
+.field-select:focus { border-color: var(--inter); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ HOME SCREEN ══ -->
+  <div class="screen active" id="screen-home">
+    <div class="home-header-bar">
+      <div class="app-name-wrap">
+        <span class="app-name-beyond">Beyond</span>
+        <span class="app-name-failure">Failure</span>
+      </div>
+      <div class="header-icons">
+        <div class="icon-btn" onclick="showScreen('search'); updateNav('search')">🔍</div>
+        <div class="icon-btn" onclick="openAdmin()">🔐</div>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <!-- Hero -->
+      <div class="hero-banner" style="margin:16px">
+        <div class="hero-text-wrap">
+          <div class="hero-greeting">Hello, Future CA! 👋</div>
+          <div class="hero-sub">Let's make learning simple & effective.</div>
+        </div>
+        <div class="hero-emoji">📚</div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <div class="tab-item active" id="tab-home-item">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showAllNotes()">
+          <span class="tab-icon">📋</span>
+          <span class="tab-label">All Notes</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('search'); updateNav('search')">
+          <span class="tab-icon">🔍</span>
+          <span class="tab-label">Search</span>
+        </div>
+        <div class="tab-item" onclick="openAdmin()">
+          <span class="tab-icon">👤</span>
+          <span class="tab-label">Admin</span>
+        </div>
+      </div>
+
+      <!-- Level Cards -->
+      <div class="level-card foundation" onclick="goToLevel('foundation')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="foundation.png" alt="CA Foundation" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📗'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Entry Level</div>
+          <div class="level-name">CA Foundation</div>
+          <div class="level-desc">Accounting, Laws, Maths & Economics ke basics se shuru karo</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-foundation">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-card inter" onclick="goToLevel('intermediate')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="intermediate.png" alt="CA Intermediate" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📘'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Intermediate</div>
+          <div class="level-name">CA Intermediate</div>
+          <div class="level-desc">Advanced concepts — Taxation, Audit, FM aur zyada seekho</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-intermediate">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-card final" onclick="goToLevel('final')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="final.png" alt="CA Final" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📙'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Final Stage</div>
+          <div class="level-name">CA Final</div>
+          <div class="level-desc">Apex level — expert knowledge aur advanced strategy</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-final">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <!-- Admin Access bottom bar -->
+      <div onclick="openAdmin()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;margin:0 16px 8px;background:var(--white);border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span>🔒</span>
+        <span style="font-size:13px;font-weight:600;color:var(--muted)">Admin Access</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEVEL SCREEN ══ -->
+  <div class="screen" id="screen-level">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="level-screen-title">Subjects</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area" id="subjects-list"></div>
+  </div>
+
+  <!-- ══ NOTES SCREEN ══ -->
+  <div class="screen" id="screen-notes">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="notes-screen-title">Notes</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:12px"></div>
+      <div class="notes-list" id="notes-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ ALL NOTES SCREEN ══ -->
+  <div class="screen" id="screen-allnotes">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">All Notes</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:8px"></div>
+      <div class="filter-chips" id="all-filter-chips"></div>
+      <div class="notes-list" id="all-notes-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ SEARCH SCREEN ══ -->
+  <div class="screen" id="screen-search">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">Search</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Notes search karo..." oninput="doSearch()" />
+        </div>
+      </div>
+      <div class="notes-list" id="search-results">
+        <div class="empty-wrap">
+          <div class="empty-emoji">🔍</div>
+          <div class="empty-title">Kuch search karo</div>
+          <div class="empty-sub">Note ka naam likho — result dikhega</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN SCREEN ══ -->
+  <div class="screen" id="screen-admin">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">Admin</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div id="admin-content"></div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="goHome()">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="nav-allnotes" onclick="showAllNotes()">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">All Notes</span>
+    </div>
+    <div class="nav-item" id="nav-search" onclick="showScreen('search'); updateNav('search')">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Search</span>
+    </div>
+    <div class="nav-item" id="nav-admin" onclick="openAdmin()">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ADD NOTE ══ -->
+<div class="modal-overlay" id="modal-add" onclick="closeModalOutside(event,'modal-add')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📝 Note Add Karo</div>
+    <div class="field-group">
+      <label class="field-label">Level & Subject</label>
+      <select class="field-select" id="note-subject-select"></select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Note Title *</label>
+      <input class="field-input" type="text" id="note-title-input" placeholder="Jaise: Chapter 1 - Introduction" maxlength="80">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Description (optional)</label>
+      <input class="field-input" type="text" id="note-desc-input" placeholder="Short description" maxlength="100">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Google Drive PDF Link *</label>
+      <input class="field-input" type="url" id="note-link-input" placeholder="https://drive.google.com/...">
+    </div>
+    <button class="btn-primary blue" onclick="saveNote()">Note Add Karo ✓</button>
+    <button class="btn-secondary" onclick="closeModal('modal-add')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: DELETE ══ -->
+<div class="modal-overlay" id="modal-delete" onclick="closeModalOutside(event,'modal-delete')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗑️ Note Delete Karo?</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.5"><span id="delete-note-name"></span> permanently delete ho jayega.</p>
+    <button class="btn-primary red" onclick="confirmDelete()">Haan, Delete Karo</button>
+    <button class="btn-secondary" onclick="closeModal('modal-delete')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+const SHEET_ID = '1qHokwwWblFu89KAJhEs_eUMaoyk1aaJMcBd1sKIvp8g';
+const ADMIN_PASS = 'Unsuccessful@23km';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxP4ejjVG8xHVnPjDBsvA1WcZmXfIbBAYnmkchd5q7So6G6X6E1Q0IbbPsfX8PN9bIM/exec';
+
+const LEVELS = {
+  foundation: {
+    name: 'CA Foundation',
+    color: 'foundation',
+    subjects: [
+      'Principles & Practice of Accounting',
+      'Business Laws',
+      'Business Mathematics & Statistics',
+      'Business Economics'
+    ]
+  },
+  intermediate: {
+    name: 'CA Intermediate',
+    color: 'inter',
+    subjects: [
+      'Advanced Accounting',
+      'Corporate & Other Laws',
+      'Taxation',
+      'Cost & Management Accounting',
+      'Auditing & Ethics',
+      'Financial Management & Strategic Management',
+      'Enterprise Information Systems',
+      'Economics for Finance'
+    ]
+  },
+  final: {
+    name: 'CA Final',
+    color: 'final',
+    subjects: [
+      'Financial Reporting',
+      'Strategic Financial Management',
+      'Advanced Auditing',
+      'Corporate & Economic Laws',
+      'Strategic Cost Management',
+      'Direct & Indirect Tax Laws'
+    ]
+  }
+};
+
+const LEVEL_COLORS = { foundation: '#22C55E', intermediate: '#3B82F6', final: '#8B5CF6' };
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+const state = {
+  isAdmin: false,
+  currentLevel: null,
+  currentSubject: null,
+  screenHistory: [],
+  allNotes: [],
+  lastFetch: 0,
+  deleteTarget: null,
+  allFilter: 'All'
+};
+
+// ══════════════════════════════════════════════════
+//  GOOGLE SHEETS FETCH
+// ══════════════════════════════════════════════════
+async function fetchNotes(force = false) {
+  const now = Date.now();
+  if (!force && state.allNotes.length && now - state.lastFetch < 60000) return state.allNotes;
+
+  try {
+    const res = await fetch(SHEET_URL + '&t=' + now);
+    const text = await res.text();
+    const json = JSON.parse(text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
+    const rows = json.table.rows;
+
+    const notes = rows.map(row => ({
+      id:      row.c[0]?.v?.toString() || '',
+      level:   row.c[1]?.v?.toString().toLowerCase().trim() || '',
+      subject: row.c[2]?.v?.toString().trim() || '',
+      title:   row.c[3]?.v?.toString().trim() || '',
+      link:    row.c[4]?.v?.toString().trim() || '',
+      desc:    row.c[5]?.v?.toString().trim() || ''
+    })).filter(n => n.title && n.link);
+
+    state.allNotes = notes;
+    state.lastFetch = now;
+    updateHomeCounts();
+    return notes;
+  } catch(e) {
+    console.error('Sheet fetch error:', e);
+    return state.allNotes;
+  }
+}
+
+function updateHomeCounts() {
+  const notes = state.allNotes;
+  ['foundation','intermediate','final'].forEach(l => {
+    const count = notes.filter(n => n.level === l).length;
+    const el = document.getElementById('count-' + l);
+    if (el) el.textContent = count;
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function showScreen(id) {
+  const cur = document.querySelector('.screen.active');
+  if (cur && cur.id !== 'screen-' + id) {
+    cur.classList.add('slide-out');
+    setTimeout(() => cur.classList.remove('slide-out', 'active'), 350);
+    state.screenHistory.push(cur.id.replace('screen-', ''));
+  }
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function goBack() {
+  const prev = state.screenHistory.pop();
+  if (!prev) { goHome(); return; }
+  const cur = document.querySelector('.screen.active');
+  if (cur) { cur.classList.remove('active'); }
+  document.getElementById('screen-' + prev).classList.add('active');
+  updateNav(prev);
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','slide-out'));
+  document.getElementById('screen-home').classList.add('active');
+  state.screenHistory = [];
+  updateNav('home');
+}
+
+function updateNav(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { home:'nav-home', allnotes:'nav-allnotes', search:'nav-search', admin:'nav-admin' };
+  const el = document.getElementById(navMap[id]);
+  if (el) el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+//  LEVEL → SUBJECTS
+// ══════════════════════════════════════════════════
+async function goToLevel(levelKey) {
+  state.currentLevel = levelKey;
+  const level = LEVELS[levelKey];
+  document.getElementById('level-screen-title').textContent = level.name;
+  showScreen('level');
+  updateNav('');
+
+  const list = document.getElementById('subjects-list');
+  list.innerHTML = `<div style="height:12px"></div>`;
+
+  // fetch notes to get counts
+  const notes = await fetchNotes();
+
+  level.subjects.forEach((sub, i) => {
+    const count = notes.filter(n => n.level === levelKey && n.subject === sub).length;
+    const color = LEVEL_COLORS[levelKey] || '#3B82F6';
+    const div = document.createElement('div');
+    div.className = 'subject-card';
+    div.onclick = () => goToNotes(levelKey, sub);
+    div.innerHTML = `
+      <div class="sub-num" style="background:${color}22;color:${color}">${i+1}</div>
+      <div class="sub-info">
+        <div class="sub-name">${sub}</div>
+        <div class="sub-count">${count} notes</div>
+      </div>
+      <div class="sub-chevron">›</div>`;
+    list.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  SUBJECT → NOTES
+// ══════════════════════════════════════════════════
+async function goToNotes(levelKey, subject) {
+  state.currentSubject = subject;
+  document.getElementById('notes-screen-title').textContent = subject.length > 28 ? subject.slice(0,26)+'…' : subject;
+  showScreen('notes');
+
+  const list = document.getElementById('notes-list');
+  list.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Notes load ho rahe hain...</div></div>`;
+
+  const notes = await fetchNotes();
+  const filtered = notes.filter(n => n.level === levelKey && n.subject === subject);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">📭</div><div class="empty-title">Koi note nahi mila</div><div class="empty-sub">Admin se notes add karwao</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+function noteCardHTML(n) {
+  const safeLink = n.link.startsWith('http') ? n.link : '#';
+  return `<a class="note-card" href="${safeLink}" target="_blank" rel="noopener">
+    <div class="note-icon">📄</div>
+    <div class="note-info">
+      <div class="note-title">${escHtml(n.title)}</div>
+      ${n.desc ? `<div class="note-desc">${escHtml(n.desc)}</div>` : '<div class="note-desc">PDF • Google Drive</div>'}
+    </div>
+    <div class="note-arrow">›</div>
+  </a>`;
+}
+
+// ══════════════════════════════════════════════════
+//  ALL NOTES
+// ══════════════════════════════════════════════════
+async function showAllNotes() {
+  showScreen('allnotes');
+  updateNav('allnotes');
+
+  // Build filter chips
+  const chips = document.getElementById('all-filter-chips');
+  const filters = ['All', 'CA Foundation', 'CA Intermediate', 'CA Final'];
+  chips.innerHTML = filters.map(f =>
+    `<div class="chip ${state.allFilter === f ? 'active' : ''}" onclick="setAllFilter('${f}')">${f}</div>`
+  ).join('');
+
+  renderAllNotes();
+}
+
+async function renderAllNotes() {
+  const list = document.getElementById('all-notes-list');
+  list.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Load ho raha hai...</div></div>`;
+  const notes = await fetchNotes();
+
+  const levelNameMap = { foundation: 'CA Foundation', intermediate: 'CA Intermediate', final: 'CA Final' };
+  let filtered = notes;
+  if (state.allFilter !== 'All') {
+    const lk = Object.entries(levelNameMap).find(([,v]) => v === state.allFilter)?.[0];
+    if (lk) filtered = notes.filter(n => n.level === lk);
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">📭</div><div class="empty-title">Koi note nahi</div><div class="empty-sub">Google Sheet mein notes add karo</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+function setAllFilter(f) {
+  state.allFilter = f;
+  document.querySelectorAll('#all-filter-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.textContent === f);
+  });
+  renderAllNotes();
+}
+
+// ══════════════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════════════
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const res = document.getElementById('search-results');
+  if (!q) {
+    res.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">🔍</div><div class="empty-title">Kuch search karo</div><div class="empty-sub">Note ka naam likho — result dikhega</div></div>`;
+    return;
+  }
+  const notes = await fetchNotes();
+  const filtered = notes.filter(n =>
+    n.title.toLowerCase().includes(q) ||
+    n.subject.toLowerCase().includes(q) ||
+    n.desc.toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    res.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">😕</div><div class="empty-title">Koi result nahi</div><div class="empty-sub">"${q}" ke liye koi note nahi mila</div></div>`;
+    return;
+  }
+  res.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════
+function openAdmin() {
+  if (state.isAdmin) {
+    showAdminPanel();
+  } else {
+    showAdminLogin();
+  }
+  showScreen('admin');
+  updateNav('admin');
+}
+
+function showAdminLogin() {
+  document.getElementById('admin-content').innerHTML = `
+    <div class="admin-login-wrap">
+      <div class="admin-icon-big">🔐</div>
+      <div class="admin-title">Admin Login</div>
+      <div class="admin-sub">Sirf authorized log hi notes add kar sakte hain</div>
+      <div style="width:100%;max-width:320px;margin-top:8px">
+        <div class="field-group">
+          <label class="field-label">Password</label>
+          <input class="field-input" type="password" id="admin-pass-input" placeholder="Password daalo" onkeypress="if(event.key==='Enter')verifyAdmin()">
+        </div>
+        <button class="btn-primary blue" onclick="verifyAdmin()">Login Karo</button>
+        <button class="btn-secondary" onclick="goBack()">Cancel</button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('admin-pass-input')?.focus(), 400);
+}
+
+function verifyAdmin() {
+  const p = document.getElementById('admin-pass-input')?.value || '';
+  if (p === ADMIN_PASS) {
+    state.isAdmin = true;
+    toast('✅ Admin login successful!', 'success');
+    showAdminPanel();
+  } else {
+    toast('❌ Galat password!', 'error');
+    const inp = document.getElementById('admin-pass-input');
+    if (inp) { inp.value = ''; inp.focus(); }
+  }
+}
+
+function showAdminPanel() {
+  const notes = state.allNotes;
+  document.getElementById('admin-content').innerHTML = `
+    <div class="admin-panel-wrap">
+      <div style="padding:20px 0 16px;text-align:center">
+        <div style="font-size:40px;margin-bottom:8px">👑</div>
+        <div style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text)">Admin Panel</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">Notes manage karo</div>
+      </div>
+
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Total Notes (Sheet se)</div>
+        <div style="font-family:var(--font-head);font-size:36px;font-weight:700;color:var(--text)">${notes.length}</div>
+      </div>
+
+      <div class="admin-card" onclick="openAddNote()">
+        <div class="admin-card-icon" style="background:#EFF6FF">📝</div>
+        <div class="admin-card-info">
+          <div class="admin-card-title">Note Add Karo</div>
+          <div class="admin-card-sub">Google Sheet mein note add hoga</div>
+        </div>
+        <div class="admin-card-arrow">›</div>
+      </div>
+
+      <div class="admin-card" onclick="refreshNotes()">
+        <div class="admin-card-icon" style="background:#F0FDF4">🔄</div>
+        <div class="admin-card-info">
+          <div class="admin-card-title">Notes Refresh Karo</div>
+          <div class="admin-card-sub">Sheet se latest notes fetch karo</div>
+        </div>
+        <div class="admin-card-arrow">›</div>
+      </div>
+
+
+
+      <div class="logout-btn" onclick="adminLogout()">🔓 Logout</div>
+    </div>`;
+}
+
+function openAddNote() {
+  populateSubjectSelect();
+  document.getElementById('note-title-input').value = '';
+  document.getElementById('note-desc-input').value = '';
+  document.getElementById('note-link-input').value = '';
+  openModal('modal-add');
+  setTimeout(() => document.getElementById('note-title-input').focus(), 400);
+}
+
+function populateSubjectSelect() {
+  const sel = document.getElementById('note-subject-select');
+  sel.innerHTML = '';
+  Object.entries(LEVELS).forEach(([lk, lv]) => {
+    const grp = document.createElement('optgroup');
+    grp.label = lv.name;
+    lv.subjects.forEach(sub => {
+      const opt = document.createElement('option');
+      opt.value = lk + '||' + sub;
+      opt.textContent = sub;
+      if (lk === state.currentLevel && sub === state.currentSubject) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+}
+
+async function saveNote() {
+  const title = document.getElementById('note-title-input').value.trim();
+  const desc  = document.getElementById('note-desc-input').value.trim();
+  const link  = document.getElementById('note-link-input').value.trim();
+  const selVal = document.getElementById('note-subject-select').value;
+
+  if (!title) { toast('Title zaroori hai!', 'error'); return; }
+  if (!link || !link.startsWith('http')) { toast('Valid Drive link chahiye!', 'error'); return; }
+  if (!selVal) { toast('Subject select karo!', 'error'); return; }
+
+  const [levelKey, subject] = selVal.split('||');
+
+  // Show saving state
+  const btn = document.querySelector('#modal-add .btn-primary');
+  btn.textContent = 'Save ho raha hai...';
+  btn.disabled = true;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        level: levelKey,
+        subject: subject,
+        title: title,
+        link: link,
+        desc: desc
+      })
+    });
+
+    closeModal('modal-add');
+    toast('✅ Note Sheet mein add ho gaya!', 'success');
+
+    // Refresh after 2 seconds
+    setTimeout(async () => {
+      await fetchNotes(true);
+      toast('🔄 Notes refresh ho gaye!', 'info');
+      if (state.currentSubject === subject && state.currentLevel === levelKey) {
+        goToNotes(levelKey, subject);
+      }
+      showAdminPanel();
+    }, 2000);
+
+  } catch(err) {
+    toast('❌ Error aaya, dobara try karo', 'error');
+  } finally {
+    btn.textContent = 'Note Add Karo ✓';
+    btn.disabled = false;
+  }
+}
+
+async function refreshNotes() {
+  toast('Refresh ho raha hai...', 'info');
+  await fetchNotes(true);
+  toast('✅ Notes refresh ho gaye!', 'success');
+  showAdminPanel();
+}
+
+function adminLogout() {
+  state.isAdmin = false;
+  toast('Logout ho gaya', 'info');
+  goHome();
+}
+
+// ══════════════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2700);
+}
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════
+//  SERVICE WORKER
+// ══════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('popstate', () => {
+  if (state.screenHistory.length > 0) goBack();
+  else history.pushState(null, '');
+});
+history.pushState(null, '');
+
+// Load notes on start
+fetchNotes();
+</script>
+</body>
+</html>
