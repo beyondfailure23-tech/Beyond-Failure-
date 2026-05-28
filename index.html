@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#F0F4FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Beyond Failure">
+<link rel="manifest" href="manifest.json">
+<title>Beyond Failure — CA Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #F0F4FF;
+  --bg2: #E8EEFF;
+  --white: #FFFFFF;
+  --text: #0D1B3E;
+  --muted: #6B7A99;
+  --border: #DDE3F0;
+  --shadow: 0 2px 16px rgba(13,27,62,0.08);
+  --shadow-lg: 0 8px 32px rgba(13,27,62,0.13);
+
+  --foundation: #22C55E;
+  --foundation-bg: #F0FDF4;
+  --foundation-border: #BBF7D0;
+  --foundation-dim: rgba(34,197,94,0.12);
+
+  --inter: #3B82F6;
+  --inter-bg: #EFF6FF;
+  --inter-border: #BFDBFE;
+  --inter-dim: rgba(59,130,246,0.12);
+
+  --final: #8B5CF6;
+  --final-bg: #F5F3FF;
+  --final-border: #DDD6FE;
+  --final-dim: rgba(139,92,246,0.12);
+
+  --nav-h: 68px;
+  --header-h: 60px;
+  --font-head: 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg: #0D1117;
+  --bg2: #161B22;
+  --white: #1C2128;
+  --text: #E6EDF3;
+  --muted: #8B949E;
+  --border: #30363D;
+  --shadow: 0 2px 16px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4);
+  --foundation-bg: rgba(34,197,94,0.1);
+  --foundation-border: rgba(34,197,94,0.3);
+  --inter-bg: rgba(59,130,246,0.1);
+  --inter-border: rgba(59,130,246,0.3);
+  --final-bg: rgba(139,92,246,0.1);
+  --final-border: rgba(139,92,246,0.3);
+}
+
+.dark-toggle {
+  width: 36px; height: 36px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.dark-toggle:active { transform: scale(0.9); }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; -webkit-tap-highlight-color: transparent; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ── APP SHELL ── */
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── SCREENS ── */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  opacity: 0; pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  background: var(--bg);
+}
+.screen.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.screen.slide-out { opacity: 0; transform: translateX(-30px); pointer-events: none; }
+
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding-bottom: calc(var(--nav-h) + 16px);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── HEADER ── */
+.app-header {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(240,244,255,0.9);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0; z-index: 10; position: relative;
+}
+.header-back {
+  width: 38px; height: 38px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.header-back:active { transform: scale(0.9); }
+.header-title {
+  font-family: var(--font-body); font-size: 16px; font-weight: 700;
+  color: var(--text); flex: 1; text-align: center;
+}
+.header-spacer { width: 38px; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  height: var(--nav-h);
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(13,27,62,0.07);
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; cursor: pointer; padding: 8px 0;
+  transition: all 0.2s;
+}
+.nav-icon { font-size: 22px; }
+.nav-label { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: 0.3px; }
+.nav-item.active .nav-label { color: var(--inter); }
+
+/* ── HOME SCREEN ── */
+.home-header-bar {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(240,244,255,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+/* App Name */
+.app-name-wrap { display: flex; align-items: baseline; gap: 2px; }
+.app-name-beyond {
+  font-family: var(--font-body);
+  font-size: 22px; font-weight: 800;
+  color: #1D4ED8;
+  letter-spacing: -0.5px;
+}
+.app-name-failure {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 22px; font-weight: 700;
+  color: #0D1B3E;
+}
+
+.header-icons { display: flex; gap: 8px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.icon-btn:active { transform: scale(0.9); }
+
+/* Hero Banner */
+.hero-banner {
+  margin: 16px;
+  background: linear-gradient(135deg, #1D4ED8 0%, #3B82F6 100%);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  overflow: hidden; position: relative;
+  box-shadow: 0 8px 24px rgba(29,78,216,0.3);
+}
+.hero-banner::before {
+  content: '';
+  position: absolute; top: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 50%;
+}
+.hero-text-wrap { position: relative; z-index: 1; }
+.hero-greeting { font-size: 18px; font-weight: 700; color: white; margin-bottom: 4px; }
+.hero-sub { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 400; }
+.hero-emoji { font-size: 52px; position: relative; z-index: 1; }
+
+/* Tab Bar */
+.tab-bar {
+  display: flex; gap: 0;
+  margin: 0 16px 16px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px;
+  box-shadow: var(--shadow);
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 8px 4px; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s;
+}
+.tab-item.active { background: var(--bg2); }
+.tab-icon { font-size: 18px; }
+.tab-label { font-size: 10px; font-weight: 600; color: var(--muted); }
+.tab-item.active .tab-label { color: var(--inter); }
+
+/* Level Cards */
+.level-card {
+  margin: 0 16px 14px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 18px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex; align-items: center; gap: 16px;
+  position: relative; overflow: hidden;
+}
+.level-card:active { transform: scale(0.98); box-shadow: var(--shadow-lg); }
+.level-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; border-radius: 20px 20px 0 0;
+}
+.level-card.foundation::before { background: var(--foundation); }
+.level-card.inter::before { background: var(--inter); }
+.level-card.final::before { background: var(--final); }
+
+.level-icon-wrap {
+  width: 64px; height: 64px; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+  overflow: hidden;
+}
+.level-info { flex: 1; min-width: 0; }
+.foundation .level-icon-wrap { background: var(--foundation-dim); }
+.inter .level-icon-wrap { background: var(--inter-dim); }
+.final .level-icon-wrap { background: var(--final-dim); }
+
+.level-info { flex: 1; }
+.level-badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 8px;
+  border-radius: 20px; margin-bottom: 6px;
+}
+.foundation .level-badge { background: var(--foundation-bg); color: var(--foundation); border: 1px solid var(--foundation-border); }
+.inter .level-badge { background: var(--inter-bg); color: var(--inter); border: 1px solid var(--inter-border); }
+.final .level-badge { background: var(--final-bg); color: var(--final); border: 1px solid var(--final-border); }
+
+.level-name { font-family: var(--font-body); font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; word-break: break-word; }
+.level-desc { font-size: 12px; color: var(--muted); line-height: 1.4; word-break: break-word; }
+.level-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.level-count { font-size: 13px; font-weight: 600; color: var(--muted); }
+.level-count span { color: var(--text); }
+.level-arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.foundation .level-arrow { background: var(--foundation); }
+.inter .level-arrow { background: var(--inter); }
+.final .level-arrow { background: var(--final); }
+
+/* ── SUBJECTS SCREEN ── */
+.subject-card {
+  margin: 0 16px 12px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+}
+.subject-card:active { transform: scale(0.98); }
+.sub-num {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 800; flex-shrink: 0;
+  font-family: var(--font-head);
+}
+.sub-info { flex: 1; }
+.sub-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.sub-count { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.sub-chevron { font-size: 16px; color: var(--muted); }
+
+/* ── NOTES SCREEN ── */
+.notes-list { padding: 0 16px; }
+.note-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+  text-decoration: none;
+}
+.note-card:active { transform: scale(0.98); }
+.note-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; background: #FEF3C7;
+}
+.note-info { flex: 1; min-width: 0; }
+.note-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.note-desc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-arrow { font-size: 18px; color: var(--muted); flex-shrink: 0; }
+
+/* Loading & Empty */
+.loading-wrap { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; gap: 16px; }
+.spinner {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--inter);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 14px; color: var(--muted); }
+
+.empty-wrap { text-align: center; padding: 60px 20px; }
+.empty-emoji { font-size: 48px; margin-bottom: 12px; }
+.empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ── SEARCH SCREEN ── */
+.search-wrap { padding: 16px; }
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 12px 16px;
+  box-shadow: var(--shadow);
+}
+.search-box input {
+  flex: 1; border: none; outline: none; background: none;
+  font-family: var(--font-body); font-size: 15px; color: var(--text);
+}
+.search-box input::placeholder { color: var(--muted); }
+.search-icon { font-size: 18px; color: var(--muted); }
+
+/* ── ADMIN SCREEN ── */
+.admin-login-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 24px; gap: 20px;
+}
+.admin-icon-big { font-size: 56px; margin-bottom: 8px; }
+.admin-title { font-family: var(--font-head); font-size: 24px; font-weight: 700; color: var(--text); text-align: center; }
+.admin-sub { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.5; }
+
+.field-group { width: 100%; margin-bottom: 14px; }
+.field-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; display: block; }
+.field-input {
+  width: 100%; background: var(--white);
+  border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; color: var(--text);
+  font-family: var(--font-body); font-size: 15px; outline: none;
+  transition: border-color 0.2s;
+}
+.field-input:focus { border-color: var(--inter); }
+
+.btn-primary {
+  width: 100%; padding: 15px; border: none; border-radius: 14px;
+  color: white; font-family: var(--font-body); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+  margin-bottom: 10px;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+.btn-primary.blue { background: linear-gradient(135deg, #1D4ED8, #3B82F6); box-shadow: 0 4px 16px rgba(29,78,216,0.35); }
+.btn-primary.green { background: linear-gradient(135deg, #16A34A, #22C55E); box-shadow: 0 4px 16px rgba(22,163,74,0.35); }
+.btn-primary.red { background: linear-gradient(135deg, #DC2626, #EF4444); }
+.btn-secondary {
+  width: 100%; padding: 13px; border: 1.5px solid var(--border);
+  border-radius: 14px; background: var(--white);
+  color: var(--text); font-family: var(--font-body); font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-secondary:active { background: var(--bg2); }
+
+/* Admin Panel */
+.admin-panel-wrap { padding: 16px; }
+.admin-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 18px;
+  margin-bottom: 12px; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); cursor: pointer; transition: transform 0.2s;
+}
+.admin-card:active { transform: scale(0.98); }
+.admin-card-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.admin-card-info { flex: 1; }
+.admin-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.admin-card-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.admin-card-arrow { font-size: 18px; color: var(--muted); }
+
+.logout-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px; border-radius: 14px; border: 1.5px solid #FECACA;
+  background: #FEF2F2; color: #DC2626; font-family: var(--font-body);
+  font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 8px;
+  transition: background 0.2s;
+}
+.logout-btn:active { background: #FEE2E2; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,27,62,0.5);
+  backdrop-filter: blur(8px);
+  z-index: 500; display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: var(--white); border-radius: 24px 24px 0 0;
+  padding: 20px 20px 40px; width: 100%; max-width: 430px; margin: 0 auto;
+  transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+  border-top: 1px solid var(--border);
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-family: var(--font-head); font-size: 20px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+
+/* ── TOAST ── */
+#toast-container {
+  position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%;
+  transform: translateX(-50%); z-index: 999; display: flex;
+  flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+}
+.toast {
+  padding: 10px 20px; border-radius: 100px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  animation: toastIn 0.3s ease forwards, toastOut 0.3s ease 2.3s forwards;
+  white-space: nowrap; box-shadow: var(--shadow-lg);
+}
+.toast.success { background: #DCFCE7; color: #166534; border: 1px solid #BBF7D0; }
+.toast.error { background: #FEE2E2; color: #991B1B; border: 1px solid #FECACA; }
+.toast.info { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+@keyframes toastIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+@keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+/* ── FOOTER ── */
+.footer {
+  margin: 8px 16px 16px;
+}
+.disclaimer-box {
+  background: linear-gradient(135deg, #EFF6FF 0%, #F0FDF4 100%);
+  border: 1px solid #BFDBFE;
+  border-radius: 16px 16px 0 0;
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.disclaimer-icon { font-size: 16px; flex-shrink: 0; margin-top: 2px; }
+.disclaimer-text {
+  font-size: 12px; color: #1E40AF; line-height: 1.6;
+  font-weight: 500; font-style: italic;
+}
+.social-bar {
+  background: var(--white);
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.social-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.social-links { display: flex; gap: 10px; }
+.social-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  transition: transform 0.2s, opacity 0.2s; border: none;
+}
+.social-btn:active { transform: scale(0.95); opacity: 0.85; }
+.social-btn.youtube { background: #FF0000; color: white; }
+.social-btn.whatsapp { background: #25D366; color: white; }
+.social-btn svg { width: 14px; height: 14px; fill: white; flex-shrink: 0; }
+
+/* Section header */
+.section-pad { padding: 16px 16px 8px; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+
+/* All Notes screen filter */
+.filter-chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: none; }
+.filter-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--muted); font-family: var(--font-body);
+  font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  flex-shrink: 0; transition: all 0.2s;
+}
+.chip.active { background: var(--inter); border-color: var(--inter); color: white; }
+
+/* ── MCQ TEST STYLES ── */
+.mcq-subject-card {
+  margin: 0 16px 12px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 16px 18px; cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); transition: transform 0.2s;
+}
+.mcq-subject-card:active { transform: scale(0.98); }
+.mcq-sub-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; background: var(--inter-bg);
+}
+.mcq-sub-info { flex: 1; }
+.mcq-sub-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.mcq-sub-count { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.coming-soon-badge {
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  color: white; font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+}
+.available-badge {
+  background: linear-gradient(135deg, #22C55E, #16A34A);
+  color: white; font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px; white-space: nowrap;
+}
+.test-card {
+  margin: 0 16px 12px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 16px 18px; cursor: pointer;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow); transition: transform 0.2s;
+}
+.test-card:active { transform: scale(0.98); }
+.test-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  background: linear-gradient(135deg, #EFF6FF, #DBEAFE);
+}
+.test-info { flex: 1; }
+.test-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.test-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.mcq-header {
+  background: linear-gradient(135deg, #0f172a, #1d4ed8, #7c3aed);
+  padding: 24px 20px; color: white; text-align: center;
+}
+.mcq-header h2 { font-family: var(--font-head); font-size: 20px; margin-bottom: 4px; }
+.mcq-header p { font-size: 12px; opacity: 0.8; }
+.mcq-name-wrap { padding: 16px; }
+.mcq-name-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow);
+}
+.mcq-name-card input {
+  flex: 1; border: none; outline: none; background: none;
+  font-family: var(--font-body); font-size: 15px; font-weight: 600; color: var(--text);
+}
+.q-card-mcq {
+  margin: 0 16px 12px; background: var(--white);
+  border: 2px solid var(--border); border-radius: 16px;
+  padding: 16px; box-shadow: var(--shadow);
+}
+.q-num-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: #1D4ED8; color: white; font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.q-text-mcq {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  margin-bottom: 12px; display: flex; align-items: flex-start;
+  gap: 10px; line-height: 1.5;
+}
+.options-grid { display: flex; flex-direction: column; gap: 8px; }
+.option-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 12px;
+  border: 2px solid var(--border); background: var(--bg);
+  cursor: pointer; font-family: var(--font-body);
+  font-size: 13px; font-weight: 600; color: var(--text);
+  transition: all 0.18s; text-align: left; width: 100%;
+}
+.option-btn.selected { border-color: #1D4ED8; background: #EFF6FF; color: #1D4ED8; }
+.option-btn.correct { border-color: #22C55E !important; background: #DCFCE7 !important; color: #15803D !important; }
+.option-btn.wrong { border-color: #EF4444 !important; background: #FEE2E2 !important; color: #B91C1C !important; }
+.opt-letter-badge {
+  width: 24px; height: 24px; border-radius: 8px; background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+}
+.mcq-submit-wrap { padding: 16px; }
+.mcq-submit-btn {
+  width: 100%; padding: 15px; border: none; border-radius: 14px;
+  background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+  color: white; font-family: var(--font-body); font-size: 15px;
+  font-weight: 700; cursor: pointer; box-shadow: 0 4px 16px rgba(29,78,216,0.35);
+}
+.mcq-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.scorecard {
+  margin: 16px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 24px; text-align: center; box-shadow: var(--shadow-lg);
+}
+.score-emoji { font-size: 48px; margin-bottom: 8px; }
+.score-num { font-family: var(--font-head); font-size: 48px; font-weight: 800; }
+.score-msg { margin: 16px 0; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; }
+.progress-wrap { height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; margin: 12px 0; }
+.progress-fill { height: 100%; border-radius: 5px; transition: width 1s ease; }
+.cert-btn {
+  width: 100%; padding: 14px; border: none; border-radius: 14px;
+  background: linear-gradient(135deg, #F59E0B, #EF4444);
+  color: white; font-family: var(--font-body); font-size: 15px;
+  font-weight: 700; cursor: pointer; margin-top: 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+#cert-canvas { display: none; }
+
+/* ── LEADERBOARD ── */
+.leaderboard-filter { display: flex; gap: 8px; padding: 0 16px 12px; overflow-x: auto; scrollbar-width: none; }
+.leaderboard-filter::-webkit-scrollbar { display: none; }
+.lb-chip {
+  padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--white); color: var(--muted); font-family: var(--font-body);
+  font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.lb-chip.active { background: var(--inter); border-color: var(--inter); color: white; }
+.lb-card {
+  margin: 0 16px 10px; background: var(--white);
+  border: 1px solid var(--border); border-radius: 16px;
+  padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+  box-shadow: var(--shadow);
+}
+.lb-rank {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head); font-size: 16px; font-weight: 800;
+  flex-shrink: 0;
+}
+.lb-rank.gold { background: linear-gradient(135deg, #FCD34D, #F59E0B); color: white; }
+.lb-rank.silver { background: linear-gradient(135deg, #E2E8F0, #94A3B8); color: white; }
+.lb-rank.bronze { background: linear-gradient(135deg, #FED7AA, #F97316); color: white; }
+.lb-rank.normal { background: var(--bg2); color: var(--muted); font-size: 14px; }
+.lb-info { flex: 1; }
+.lb-name { font-size: 14px; font-weight: 700; color: var(--text); }
+.lb-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.lb-score { font-family: var(--font-head); font-size: 20px; font-weight: 800; color: var(--inter); }
+
+/* Select dropdown */
+.field-select {
+  width: 100%; background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 14px 16px; color: var(--text);
+  font-family: var(--font-body); font-size: 15px; outline: none; appearance: none;
+  -webkit-appearance: none;
+}
+.field-select:focus { border-color: var(--inter); }
+</style>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7Z83WH2RG8"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-7Z83WH2RG8');
+</script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ HOME SCREEN ══ -->
+  <div class="screen active" id="screen-home">
+    <div class="home-header-bar">
+      <div class="app-name-wrap">
+        <span class="app-name-beyond">Beyond</span>
+        <span class="app-name-failure">Failure</span>
+      </div>
+      <div class="header-icons">
+        <div class="icon-btn" onclick="showScreen('search'); updateNav('search')">🔍</div>
+        <div class="dark-toggle" onclick="toggleDark()" id="darkBtn">🌙</div>
+        <div class="icon-btn" onclick="openAdmin()">🔐</div>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <!-- Hero -->
+      <div class="hero-banner" style="margin:16px">
+        <div class="hero-text-wrap">
+          <div class="hero-greeting">Hello, Future CA! 👋</div>
+          <div class="hero-sub">Let's make learning simple & effective.</div>
+        </div>
+        <img src="logo.png" alt="Beyond Failure Logo" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid rgba(255,255,255,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.25)">
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <div class="tab-item active" id="tab-home-item">
+          <span class="tab-icon">🏠</span>
+          <span class="tab-label">Home</span>
+        </div>
+        <div class="tab-item" onclick="showAllNotes()">
+          <span class="tab-icon">📋</span>
+          <span class="tab-label">All Notes</span>
+        </div>
+        <div class="tab-item" onclick="showScreen('search'); updateNav('search')">
+          <span class="tab-icon">🔍</span>
+          <span class="tab-label">Search</span>
+        </div>
+        <div class="tab-item" onclick="openAdmin()">
+          <span class="tab-icon">👤</span>
+          <span class="tab-label">Admin</span>
+        </div>
+      </div>
+
+      <!-- Level Cards -->
+      <div class="level-card foundation" onclick="goToLevel('foundation')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="Ca foundation.jpg" alt="CA Foundation" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📗'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Entry Level</div>
+          <div class="level-name">CA Foundation</div>
+          <div class="level-desc">Accounting, Laws, Maths & Economics ke basics se shuru karo</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-foundation">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-card inter" onclick="goToLevel('intermediate')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="ca intermediate.jpg" alt="CA Intermediate" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📘'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Intermediate</div>
+          <div class="level-name">CA Intermediate</div>
+          <div class="level-desc">Advanced concepts — Taxation, Audit, FM aur zyada seekho</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-intermediate">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="level-card final" onclick="goToLevel('final')">
+        <div class="level-icon-wrap" style="overflow:hidden;padding:0;">
+          <img src="Ca final.png" alt="CA Final" style="width:100%;height:100%;object-fit:cover;border-radius:16px;" onerror="this.parentElement.innerHTML='📙'">
+        </div>
+        <div class="level-info">
+          <div class="level-badge">Final Stage</div>
+          <div class="level-name">CA Final</div>
+          <div class="level-desc">Apex level — expert knowledge aur advanced strategy</div>
+          <div class="level-footer">
+            <div class="level-count"><span id="count-final">0</span> Notes</div>
+            <div class="level-arrow">→</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <!-- Strong Disclaimer -->
+        <div class="disclaimer-box">
+          <span class="disclaimer-icon">📌</span>
+          <div>
+            <span class="disclaimer-text">"These notes are shared for educational purposes only. All rights reserved to their respective owners. Beyond Failure does not claim ownership of any shared content."</span>
+          </div>
+        </div>
+
+        <!-- DMCA & Contact -->
+        <div style="background:#FEF9F0;border:1px solid #FDE68A;border-top:none;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div style="font-size:11px;color:#92400E;line-height:1.5;">
+            <div style="font-weight:700;margin-bottom:2px;">⚖️ DMCA / Copyright Issue?</div>
+            <div>If you are the owner of any content and wish it to be removed, please contact us immediately.</div>
+          </div>
+          <a href="mailto:beyondfailure23@gmail.com" style="background:#B45309;color:white;font-size:11px;font-weight:700;padding:8px 12px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0;">
+            📧 Contact
+          </a>
+        </div>
+
+        <!-- Social Bar -->
+        <div class="social-bar" style="border-top:none;border-radius:0 0 16px 16px;">
+          <span class="social-label">Connect Us</span>
+          <div class="social-links">
+            <a class="social-btn youtube" href="https://youtube.com/@cabulletin23" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+              YouTube
+            </a>
+            <a class="social-btn whatsapp" href="https://chat.whatsapp.com/HHhfSgH6Im9FNd4kFADm1e" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+              WhatsApp
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Access bottom bar -->
+      <div onclick="openAdmin()" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;margin:0 16px 8px;background:var(--white);border:1px solid var(--border);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);">
+        <span>🔒</span>
+        <span style="font-size:13px;font-weight:600;color:var(--muted)">Admin Access</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEVEL SCREEN ══ -->
+  <div class="screen" id="screen-level">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="level-screen-title">Subjects</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area" id="subjects-list"></div>
+  </div>
+
+  <!-- ══ NOTES SCREEN ══ -->
+  <div class="screen" id="screen-notes">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="notes-screen-title">Notes</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:12px"></div>
+      <div class="notes-list" id="notes-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ ALL NOTES SCREEN ══ -->
+  <div class="screen" id="screen-allnotes">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">All Notes</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:8px"></div>
+      <div class="filter-chips" id="all-filter-chips"></div>
+      <div class="notes-list" id="all-notes-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ SEARCH SCREEN ══ -->
+  <div class="screen" id="screen-search">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">Search</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Notes search karo..." oninput="doSearch()" />
+        </div>
+      </div>
+      <div class="notes-list" id="search-results">
+        <div class="empty-wrap">
+          <div class="empty-emoji">🔍</div>
+          <div class="empty-title">Kuch search karo</div>
+          <div class="empty-sub">Note ka naam likho — result dikhega</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ADMIN SCREEN ══ -->
+  <div class="screen" id="screen-admin">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">Admin</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div id="admin-content"></div>
+    </div>
+  </div>
+
+  <!-- ══ MCQ SUBJECTS SCREEN ══ -->
+  <div class="screen" id="screen-mcqsubjects">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">MCQ Test Practice</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:12px"></div>
+      <div id="mcq-subjects-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ MCQ TESTS LIST SCREEN ══ -->
+  <div class="screen" id="screen-mcqtests">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="mcq-tests-title">Tests</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:12px"></div>
+      <div id="mcq-tests-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ MCQ TEST SCREEN ══ -->
+  <div class="screen" id="screen-mcqtest">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title" id="mcq-test-title">Test</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area" id="mcq-test-content"></div>
+  </div>
+
+  <!-- ══ LEADERBOARD SCREEN ══ -->
+  <div class="screen" id="screen-leaderboard">
+    <div class="app-header">
+      <div class="header-back" onclick="goBack()">←</div>
+      <div class="header-title">🏆 Leaderboard</div>
+      <div class="header-spacer"></div>
+    </div>
+    <div class="scroll-area">
+      <div style="height:12px"></div>
+      <div id="leaderboard-content"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="goHome()">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item" id="nav-allnotes" onclick="showAllNotes()">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">All Notes</span>
+    </div>
+    <div class="nav-item" id="nav-search" onclick="showScreen('search'); updateNav('search')">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Search</span>
+    </div>
+    <div class="nav-item" id="nav-admin" onclick="openAdmin()">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Admin</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: ADD NOTE ══ -->
+<div class="modal-overlay" id="modal-add" onclick="closeModalOutside(event,'modal-add')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📝 Note Add Karo</div>
+    <div class="field-group">
+      <label class="field-label">Level & Subject</label>
+      <select class="field-select" id="note-subject-select"></select>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Note Title *</label>
+      <input class="field-input" type="text" id="note-title-input" placeholder="Jaise: Chapter 1 - Introduction" maxlength="80">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Description (optional)</label>
+      <input class="field-input" type="text" id="note-desc-input" placeholder="Short description" maxlength="100">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Google Drive PDF Link *</label>
+      <input class="field-input" type="url" id="note-link-input" placeholder="https://drive.google.com/...">
+    </div>
+    <button class="btn-primary blue" onclick="saveNote()">Note Add Karo ✓</button>
+    <button class="btn-secondary" onclick="closeModal('modal-add')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: DELETE ══ -->
+<div class="modal-overlay" id="modal-delete" onclick="closeModalOutside(event,'modal-delete')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗑️ Note Delete Karo?</div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.5"><span id="delete-note-name"></span> permanently delete ho jayega.</p>
+    <button class="btn-primary red" onclick="confirmDelete()">Haan, Delete Karo</button>
+    <button class="btn-secondary" onclick="closeModal('modal-delete')">Cancel</button>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+const SHEET_ID = '1qHokwwWblFu89KAJhEs_eUMaoyk1aaJMcBd1sKIvp8g';
+const ADMIN_PASS = 'Unsuccessful@23km';
+const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXW14PquapiB1-JQPEKgEWjRmldJVdcj4lxcoMsKf8q6i1C1aD5EKrL7aKftSYDG9W/exec';
+const LEADERBOARD_URL = 'https://script.google.com/macros/s/AKfycbxXW14PquapiB1-JQPEKgEWjRmldJVdcj4lxcoMsKf8q6i1C1aD5EKrL7aKftSYDG9W/exec';
+
+const LEVELS = {
+  foundation: {
+    name: 'CA Foundation',
+    color: 'foundation',
+    subjects: [
+      'Principles & Practice of Accounting',
+      'Business Laws',
+      'Business Mathematics & Statistics',
+      'Business Economics',
+      'Study Bundle'
+    ]
+  },
+  intermediate: {
+    name: 'CA Intermediate',
+    color: 'inter',
+    subjects: [
+      'Advanced Accounting',
+      'Corporate & Other Laws',
+      'Taxation',
+      'Cost & Management Accounting',
+      'Auditing & Ethics',
+      'Financial Management & Strategic Management',
+      'MCQ Test Practice'
+    ]
+  },
+  final: {
+    name: 'CA Final',
+    color: 'final',
+    subjects: [
+      'Financial Reporting',
+      'Strategic Financial Management',
+      'Advanced Auditing',
+      'Corporate & Economic Laws',
+      'Strategic Cost Management',
+      'Direct & Indirect Tax Laws'
+    ]
+  }
+};
+
+const LEVEL_COLORS = { foundation: '#22C55E', intermediate: '#3B82F6', final: '#8B5CF6' };
+
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+const state = {
+  isAdmin: false,
+  currentLevel: null,
+  currentSubject: null,
+  screenHistory: [],
+  allNotes: [],
+  lastFetch: 0,
+  deleteTarget: null,
+  allFilter: 'All'
+};
+
+// ══════════════════════════════════════════════════
+//  GOOGLE SHEETS FETCH
+// ══════════════════════════════════════════════════
+async function fetchNotes(force = false) {
+  const now = Date.now();
+  if (!force && state.allNotes.length && now - state.lastFetch < 60000) return state.allNotes;
+
+  try {
+    const res = await fetch(SHEET_URL + '&t=' + now);
+    const text = await res.text();
+    const json = JSON.parse(text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, ''));
+    const rows = json.table.rows;
+
+    const notes = rows.map(row => ({
+      id:      row.c[0]?.v?.toString() || '',
+      level:   row.c[1]?.v?.toString().toLowerCase().trim() || '',
+      subject: row.c[2]?.v?.toString().trim() || '',
+      title:   row.c[3]?.v?.toString().trim() || '',
+      link:    row.c[4]?.v?.toString().trim() || '',
+      desc:    row.c[5]?.v?.toString().trim() || ''
+    })).filter(n => n.title && n.link);
+
+    state.allNotes = notes;
+    state.lastFetch = now;
+    updateHomeCounts();
+    return notes;
+  } catch(e) {
+    console.error('Sheet fetch error:', e);
+    return state.allNotes;
+  }
+}
+
+function updateHomeCounts() {
+  const notes = state.allNotes;
+  ['foundation','intermediate','final'].forEach(l => {
+    const count = notes.filter(n => n.level === l).length;
+    const el = document.getElementById('count-' + l);
+    if (el) el.textContent = count;
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function showScreen(id) {
+  const cur = document.querySelector('.screen.active');
+  if (cur && cur.id !== 'screen-' + id) {
+    cur.classList.add('slide-out');
+    setTimeout(() => cur.classList.remove('slide-out', 'active'), 350);
+    state.screenHistory.push(cur.id.replace('screen-', ''));
+  }
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function goBack() {
+  const prev = state.screenHistory.pop();
+  if (!prev) { goHome(); return; }
+  const cur = document.querySelector('.screen.active');
+  if (cur) { cur.classList.remove('active'); }
+  document.getElementById('screen-' + prev).classList.add('active');
+  updateNav(prev);
+}
+
+function goHome() {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','slide-out'));
+  document.getElementById('screen-home').classList.add('active');
+  state.screenHistory = [];
+  updateNav('home');
+}
+
+function updateNav(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { home:'nav-home', allnotes:'nav-allnotes', search:'nav-search', admin:'nav-admin' };
+  const el = document.getElementById(navMap[id]);
+  if (el) el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════════
+//  LEVEL → SUBJECTS
+// ══════════════════════════════════════════════════
+async function goToLevel(levelKey) {
+  state.currentLevel = levelKey;
+  const level = LEVELS[levelKey];
+  document.getElementById('level-screen-title').textContent = level.name;
+  showScreen('level');
+  updateNav('');
+
+  const list = document.getElementById('subjects-list');
+  list.innerHTML = `<div style="height:12px"></div>`;
+
+  const notes = await fetchNotes();
+
+  level.subjects.forEach((sub, i) => {
+    const isMCQ = sub === 'MCQ Test Practice';
+    const count = isMCQ ? '' : notes.filter(n => n.level === levelKey && n.subject === sub).length;
+    const color = LEVEL_COLORS[levelKey] || '#3B82F6';
+    const div = document.createElement('div');
+    div.className = 'subject-card';
+    div.onclick = () => isMCQ ? goToMCQSubjects() : goToNotes(levelKey, sub);
+    div.innerHTML = `
+      <div class="sub-num" style="background:${color}22;color:${color}">${i+1}</div>
+      <div class="sub-info">
+        <div class="sub-name">${sub}</div>
+        <div class="sub-count">${isMCQ ? '6 subjects • MCQ Tests' : count + ' notes'}</div>
+      </div>
+      <div class="sub-chevron">›</div>`;
+    list.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  SUBJECT → NOTES
+// ══════════════════════════════════════════════════
+async function goToNotes(levelKey, subject) {
+  state.currentSubject = subject;
+  document.getElementById('notes-screen-title').textContent = subject.length > 28 ? subject.slice(0,26)+'…' : subject;
+  showScreen('notes');
+
+  const list = document.getElementById('notes-list');
+  list.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Notes load ho rahe hain...</div></div>`;
+
+  const notes = await fetchNotes();
+  const filtered = notes.filter(n => n.level === levelKey && n.subject === subject);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">📭</div><div class="empty-title">Koi note nahi mila</div><div class="empty-sub">Admin se notes add karwao</div></div>`;
+    return;
+  }
+
+  // Study Bundle — 2 segments
+  if (subject === 'Study Bundle') {
+    const notesSection = filtered.filter(n => n.desc !== 'practice');
+    const practiceSection = filtered.filter(n => n.desc === 'practice');
+    let html = '';
+    if (notesSection.length) {
+      html += `<div style="margin:0 0 8px;padding:6px 4px;display:flex;align-items:center;gap:8px;">
+        <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:4px 14px;font-size:12px;font-weight:700;color:#1D4ED8;">📚 Notes & Materials</div>
+      </div>`;
+      html += notesSection.map(n => noteCardHTML(n)).join('');
+    }
+    if (practiceSection.length) {
+      html += `<div style="margin:16px 0 8px;padding:6px 4px;display:flex;align-items:center;gap:8px;">
+        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:4px 14px;font-size:12px;font-weight:700;color:#16A34A;">📝 Practice Section</div>
+      </div>`;
+      html += practiceSection.map(n => noteCardHTML(n)).join('');
+    }
+    list.innerHTML = html;
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+function noteCardHTML(n) {
+  const safeLink = n.link.startsWith('http') ? n.link : '#';
+  return `<a class="note-card" href="${safeLink}" target="_blank" rel="noopener">
+    <div class="note-icon">📄</div>
+    <div class="note-info">
+      <div class="note-title">${escHtml(n.title)}</div>
+      ${n.desc ? `<div class="note-desc">${escHtml(n.desc)}</div>` : '<div class="note-desc">PDF • Google Drive</div>'}
+    </div>
+    <div class="note-arrow">›</div>
+  </a>`;
+}
+
+// ══════════════════════════════════════════════════
+//  ALL NOTES
+// ══════════════════════════════════════════════════
+async function showAllNotes() {
+  showScreen('allnotes');
+  updateNav('allnotes');
+
+  // Build filter chips
+  const chips = document.getElementById('all-filter-chips');
+  const filters = ['All', 'CA Foundation', 'CA Intermediate', 'CA Final'];
+  chips.innerHTML = filters.map(f =>
+    `<div class="chip ${state.allFilter === f ? 'active' : ''}" onclick="setAllFilter('${f}')">${f}</div>`
+  ).join('');
+
+  renderAllNotes();
+}
+
+async function renderAllNotes() {
+  const list = document.getElementById('all-notes-list');
+  list.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Load ho raha hai...</div></div>`;
+  const notes = await fetchNotes();
+
+  const levelNameMap = { foundation: 'CA Foundation', intermediate: 'CA Intermediate', final: 'CA Final' };
+  let filtered = notes;
+  if (state.allFilter !== 'All') {
+    const lk = Object.entries(levelNameMap).find(([,v]) => v === state.allFilter)?.[0];
+    if (lk) filtered = notes.filter(n => n.level === lk);
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">📭</div><div class="empty-title">Koi note nahi</div><div class="empty-sub">Google Sheet mein notes add karo</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+function setAllFilter(f) {
+  state.allFilter = f;
+  document.querySelectorAll('#all-filter-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.textContent === f);
+  });
+  renderAllNotes();
+}
+
+// ══════════════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════════════
+async function doSearch() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const res = document.getElementById('search-results');
+  if (!q) {
+    res.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">🔍</div><div class="empty-title">Kuch search karo</div><div class="empty-sub">Note ka naam likho — result dikhega</div></div>`;
+    return;
+  }
+  const notes = await fetchNotes();
+  const filtered = notes.filter(n =>
+    n.title.toLowerCase().includes(q) ||
+    n.subject.toLowerCase().includes(q) ||
+    n.desc.toLowerCase().includes(q)
+  );
+  if (!filtered.length) {
+    res.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">😕</div><div class="empty-title">Koi result nahi</div><div class="empty-sub">"${q}" ke liye koi note nahi mila</div></div>`;
+    return;
+  }
+  res.innerHTML = filtered.map(n => noteCardHTML(n)).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════
+function openAdmin() {
+  if (state.isAdmin) {
+    showAdminPanel();
+  } else {
+    showAdminLogin();
+  }
+  showScreen('admin');
+  updateNav('admin');
+}
+
+function showAdminLogin() {
+  document.getElementById('admin-content').innerHTML = `
+    <div class="admin-login-wrap">
+      <div class="admin-icon-big">🔐</div>
+      <div class="admin-title">Admin Login</div>
+      <div class="admin-sub">Sirf authorized log hi notes add kar sakte hain</div>
+      <div style="width:100%;max-width:320px;margin-top:8px">
+        <div class="field-group">
+          <label class="field-label">Password</label>
+          <input class="field-input" type="password" id="admin-pass-input" placeholder="Password daalo" onkeypress="if(event.key==='Enter')verifyAdmin()">
+        </div>
+        <button class="btn-primary blue" onclick="verifyAdmin()">Login Karo</button>
+        <button class="btn-secondary" onclick="goBack()">Cancel</button>
+      </div>
+    </div>`;
+  setTimeout(() => document.getElementById('admin-pass-input')?.focus(), 400);
+}
+
+function verifyAdmin() {
+  const p = document.getElementById('admin-pass-input')?.value || '';
+  if (p === ADMIN_PASS) {
+    state.isAdmin = true;
+    toast('✅ Admin login successful!', 'success');
+    showAdminPanel();
+  } else {
+    toast('❌ Galat password!', 'error');
+    const inp = document.getElementById('admin-pass-input');
+    if (inp) { inp.value = ''; inp.focus(); }
+  }
+}
+
+function showAdminPanel() {
+  const notes = state.allNotes;
+  document.getElementById('admin-content').innerHTML = `
+    <div class="admin-panel-wrap">
+      <div style="padding:20px 0 16px;text-align:center">
+        <div style="font-size:40px;margin-bottom:8px">👑</div>
+        <div style="font-family:var(--font-head);font-size:22px;font-weight:700;color:var(--text)">Admin Panel</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">Notes manage karo</div>
+      </div>
+
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:16px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);">
+        <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Total Notes (Sheet se)</div>
+        <div style="font-family:var(--font-head);font-size:36px;font-weight:700;color:var(--text)">${notes.length}</div>
+      </div>
+
+      <div class="admin-card" onclick="openAddNote()">
+        <div class="admin-card-icon" style="background:#EFF6FF">📝</div>
+        <div class="admin-card-info">
+          <div class="admin-card-title">Note Add Karo</div>
+          <div class="admin-card-sub">Google Sheet mein note add hoga</div>
+        </div>
+        <div class="admin-card-arrow">›</div>
+      </div>
+
+      <div class="admin-card" onclick="refreshNotes()">
+        <div class="admin-card-icon" style="background:#F0FDF4">🔄</div>
+        <div class="admin-card-info">
+          <div class="admin-card-title">Notes Refresh Karo</div>
+          <div class="admin-card-sub">Sheet se latest notes fetch karo</div>
+        </div>
+        <div class="admin-card-arrow">›</div>
+      </div>
+
+
+
+      <div class="logout-btn" onclick="adminLogout()">🔓 Logout</div>
+    </div>`;
+}
+
+function openAddNote() {
+  populateSubjectSelect();
+  document.getElementById('note-title-input').value = '';
+  document.getElementById('note-desc-input').value = '';
+  document.getElementById('note-link-input').value = '';
+  openModal('modal-add');
+  setTimeout(() => document.getElementById('note-title-input').focus(), 400);
+}
+
+function populateSubjectSelect() {
+  const sel = document.getElementById('note-subject-select');
+  sel.innerHTML = '';
+  Object.entries(LEVELS).forEach(([lk, lv]) => {
+    const grp = document.createElement('optgroup');
+    grp.label = lv.name;
+    lv.subjects.forEach(sub => {
+      const opt = document.createElement('option');
+      opt.value = lk + '||' + sub;
+      opt.textContent = sub;
+      if (lk === state.currentLevel && sub === state.currentSubject) opt.selected = true;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+}
+
+async function saveNote() {
+  const title = document.getElementById('note-title-input').value.trim();
+  const desc  = document.getElementById('note-desc-input').value.trim();
+  const link  = document.getElementById('note-link-input').value.trim();
+  const selVal = document.getElementById('note-subject-select').value;
+
+  if (!title) { toast('Title zaroori hai!', 'error'); return; }
+  if (!link || !link.startsWith('http')) { toast('Valid Drive link chahiye!', 'error'); return; }
+  if (!selVal) { toast('Subject select karo!', 'error'); return; }
+
+  const [levelKey, subject] = selVal.split('||');
+
+  // Show saving state
+  const btn = document.querySelector('#modal-add .btn-primary');
+  btn.textContent = 'Save ho raha hai...';
+  btn.disabled = true;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        level: levelKey,
+        subject: subject,
+        title: title,
+        link: link,
+        desc: desc
+      })
+    });
+
+    closeModal('modal-add');
+    toast('✅ Note Sheet mein add ho gaya!', 'success');
+
+    // Refresh after 2 seconds
+    setTimeout(async () => {
+      await fetchNotes(true);
+      toast('🔄 Notes refresh ho gaye!', 'info');
+      if (state.currentSubject === subject && state.currentLevel === levelKey) {
+        goToNotes(levelKey, subject);
+      }
+      showAdminPanel();
+    }, 2000);
+
+  } catch(err) {
+    toast('❌ Error aaya, dobara try karo', 'error');
+  } finally {
+    btn.textContent = 'Note Add Karo ✓';
+    btn.disabled = false;
+  }
+}
+
+async function refreshNotes() {
+  toast('Refresh ho raha hai...', 'info');
+  await fetchNotes(true);
+  toast('✅ Notes refresh ho gaye!', 'success');
+  showAdminPanel();
+}
+
+function adminLogout() {
+  state.isAdmin = false;
+  toast('Logout ho gaya', 'info');
+  goHome();
+}
+
+// ══════════════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2700);
+}
+
+// ══════════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════════
+function escHtml(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════
+//  SERVICE WORKER
+// ══════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  MCQ TEST DATA
+// ══════════════════════════════════════════════════
+const MCQ_SUBJECTS = [
+  { id: 'adv-accounting', name: 'Advanced Accounting', emoji: '📊', available: true,
+    tests: [
+      { id: 'as13', name: 'Test Paper 1 — AS-13', topic: 'Accounting for Investments', questions: 30 }
+    ]
+  },
+  { id: 'corp-laws', name: 'Corporate & Other Laws', emoji: '⚖️', available: false },
+  { id: 'taxation', name: 'Taxation', emoji: '🧾', available: false },
+  { id: 'costing', name: 'Cost & Management Accounting', emoji: '📈', available: false },
+  { id: 'audit', name: 'Auditing & Ethics', emoji: '🔍', available: false },
+  { id: 'fm-sm', name: 'Financial Management & SM', emoji: '💹', available: false },
+];
+
+const MCQ_TESTS = {
+  'as13': {
+    title: 'AS-13: Accounting for Investments',
+    subject: 'Advanced Accounting',
+    questions: [
+      { q: 'As per AS-13, investments are assets held by an enterprise for:', opts: ['Only capital appreciation','Earning income by way of dividends, interest and rentals, capital appreciation or other benefits','Trading purposes only','Meeting short-term obligations'], ans: 1 },
+      { q: 'Which of the following is NOT considered as "Investment" under AS-13?', opts: ['Shares held for dividend income','Buildings held for rental income','Stock-in-trade','Government securities held for interest income'], ans: 2 },
+      { q: 'AS-13 does NOT apply to:', opts: ['Investment in equity shares by a manufacturing company','Investments of mutual funds and venture capital funds','Investment in government bonds','Investment in debentures'], ans: 1 },
+      { q: 'An Investment Property under AS-13 is accounted for as per:', opts: ['AS-13 itself at fair value','Cost model as prescribed in AS-10','Net realisable value method','Lower of cost or market value'], ans: 1 },
+      { q: 'A current investment is one which is:', opts: ['Readily realisable and intended to be held for not more than 6 months','Readily realisable and intended to be held for not more than 1 year','Held for more than 1 year','Held till maturity only'], ans: 1 },
+      { q: 'Long-term investments under AS-13 are carried at:', opts: ['Lower of cost and fair value','Market value','Usually at cost','Net realisable value'], ans: 2 },
+      { q: 'Current investments are valued at:', opts: ['Cost only','Fair value only','Lower of cost and fair value','Higher of cost and fair value'], ans: 2 },
+      { q: 'For current investments, the lower of cost and fair value can be determined on:', opts: ['Global/overall portfolio basis only','Individual basis or category-wise basis, but NOT on global basis','Category-wise basis only','Any basis as per management choice'], ans: 1 },
+      { q: 'Fair Value under AS-13 means:', opts: ['Market price of investment on stock exchange','Amount for which an asset could be exchanged between knowledgeable, willing parties in an arm\'s length transaction','Net realisable value always','Book value of the investment'], ans: 1 },
+      { q: 'Market value under AS-13 is:', opts: ['Face value of the investment','Cost of the investment plus brokerage','Amount obtainable from sale in open market, net of disposal expenses','Fair value minus depreciation'], ans: 2 },
+      { q: 'Cost of investment purchased directly includes:', opts: ['Purchase price only','Purchase price plus acquisition charges like brokerage, fees and duties','Purchase price minus brokerage','Face value only'], ans: 1 },
+      { q: 'When investment is acquired in exchange for shares or other securities, cost of investment is:', opts: ['Always the book value of securities issued','Fair Market Value of securities issued OR Fair Market Value of investment acquired, whichever is more clearly evident','Face value of securities issued','Market value of investment acquired only'], ans: 1 },
+      { q: 'Interest on debentures (for investment purposes) is always calculated on:', opts: ['Market value','Purchase price','Face value','Cost of investment'], ans: 2 },
+      { q: 'If a transaction is silent about whether it is Ex-interest or Cum-interest, it should be assumed as:', opts: ['Cum-interest','Ex-interest','Mid-interest','No interest'], ans: 1 },
+      { q: 'In case of Cum-interest purchase, interest is:', opts: ['Added to cost of investment','Deducted while calculating purchase cost','Ignored completely','Credited to P&L directly'], ans: 1 },
+      { q: 'When right shares offered are subscribed by the investor, the cost of right shares is:', opts: ['Charged to P&L account','Added to the carrying amount of the original holding','Treated as income','Deducted from original investment cost'], ans: 1 },
+      { q: 'When right shares are NOT subscribed but sold in the market, sale proceeds are:', opts: ['Added to carrying amount of investment','Ignored','Taken to Profit and Loss statement','Adjusted against face value of original shares'], ans: 2 },
+      { q: 'Under Para 13 of AS-13, if market value after ex-right is lower than cost, sale proceeds of rights can be used to:', opts: ['Credit to P&L entirely','Reduce the carrying amount of investments to market value; excess credited to P&L','Increase the carrying amount of investment','Reduce the face value of shares'], ans: 1 },
+      { q: 'For bonus shares received, the investor should:', opts: ['Pass an entry debiting Investment A/c at market value','Make no entry; only number of shares increases, reducing cost per share','Credit P&L with market value of bonus shares','Debit Investment A/c and credit P&L'], ans: 1 },
+      { q: 'Pre-acquisition dividend (Final Dividend) received on equity shares is treated as:', opts: ['Credited to Dividend Income A/c (P&L)','Credited to Investment A/c (reduces cost)','Ignored','Credited to Capital Reserve'], ans: 1 },
+      { q: 'Interim dividend received is always treated as:', opts: ['Pre-acquisition dividend','Post-acquisition dividend (credited to P&L)','Deducted from investment cost','Transferred to general reserve'], ans: 1 },
+      { q: 'When Long-term investment is reclassified to Current investment, transfer is made at:', opts: ['Cost only','Fair value only','Lower of cost and carrying amount at date of transfer','Higher of cost and fair value'], ans: 2 },
+      { q: 'When Current investment is reclassified to Long-term investment, transfer is made at:', opts: ['Cost only','Lower of cost and fair value at date of transfer','Higher of cost and fair value','Market value only'], ans: 1 },
+      { q: 'A decline in value of long-term investment is recognised in P&L only when it is:', opts: ['Any decline, even temporary','Decline other than temporary (permanent decline)','Decline of more than 20%','Decline lasting more than 6 months'], ans: 1 },
+      { q: 'On disposal of an investment, profit or loss is calculated as:', opts: ['Difference between face value and sale proceeds','Difference between carrying amount and disposal proceeds net of expenses','Difference between cost and face value','Difference between market value and face value'], ans: 1 },
+      { q: 'If fair value of current investment rises subsequently after a reduction, the increase is credited to P&L only:', opts: ['Up to original cost; excess ignored','In full, including excess over cost','Only 50% of the increase','Not recognised at all'], ans: 0 },
+      { q: 'Which of the following is required to be disclosed under AS-13?', opts: ['Accounting policies for determination of carrying amount of investments','Aggregate of quoted and unquoted investments with market value of quoted investments','Profits and losses on disposal of investments','All of the above'], ans: 3 },
+      { q: 'AS-13 does NOT apply to which of the following entities?', opts: ['Manufacturing companies','Trading companies','Banks and public financial institutions','Real estate companies'], ans: 2 },
+      { q: 'Brokerage paid on purchase of investment is:', opts: ['Charged to P&L directly','Added to cost of investment','Deducted from cost of investment','Treated as capital expenditure separately'], ans: 1 },
+      { q: 'If question is silent about FIFO or Weighted Average method for investment valuation:', opts: ['Always use Weighted Average','Always use LIFO','Assume any method; FIFO preferred','Use Simple Average'], ans: 2 },
+    ]
+  }
+};
+
+// MCQ State
+let mcqState = { answers: {}, submitted: false, testId: null, studentName: '' };
+
+// ── MCQ NAVIGATION ──
+function goToMCQSubjects() {
+  showScreen('mcqsubjects');
+  const list = document.getElementById('mcq-subjects-list');
+  list.innerHTML = '<div style="height:0"></div>' + MCQ_SUBJECTS.map(s => `
+    <div class="mcq-subject-card" onclick="${s.available ? `goToMCQTests('${s.id}','${s.name}')` : 'showComingSoon()'}">
+      <div class="mcq-sub-icon">${s.emoji}</div>
+      <div class="mcq-sub-info">
+        <div class="mcq-sub-name">${s.name}</div>
+        <div class="mcq-sub-count">${s.available ? (s.tests?.length || 0) + ' test(s) available' : 'Tests coming soon'}</div>
+      </div>
+      <div class="${s.available ? 'available-badge' : 'coming-soon-badge'}">${s.available ? '✅ Live' : '🔜 Soon'}</div>
+    </div>`).join('');
+}
+
+function showComingSoon() {
+  toast('Coming Soon! 🔜 Stay tuned!', 'info');
+}
+
+function goToMCQTests(subjectId, subjectName) {
+  const subject = MCQ_SUBJECTS.find(s => s.id === subjectId);
+  if (!subject || !subject.available) return;
+  document.getElementById('mcq-tests-title').textContent = subjectName;
+  showScreen('mcqtests');
+  const list = document.getElementById('mcq-tests-list');
+  list.innerHTML = '<div style="height:0"></div>' + (subject.tests || []).map(t => `
+    <div class="test-card" onclick="openMCQTest('${t.id}')">
+      <div class="test-icon">📝</div>
+      <div class="test-info">
+        <div class="test-name">${t.name}</div>
+        <div class="test-meta">${t.topic} &nbsp;|&nbsp; ${t.questions} Questions</div>
+      </div>
+      <div style="font-size:18px;color:var(--muted)">›</div>
+    </div>`).join('');
+}
+
+function openMCQTest(testId) {
+  const test = MCQ_TESTS[testId];
+  if (!test) return;
+  mcqState = { answers: {}, submitted: false, testId, studentName: '' };
+  document.getElementById('mcq-test-title').textContent = testId === 'as13' ? 'AS-13 Test' : 'Test';
+  showScreen('mcqtest');
+  renderMCQTest(test);
+}
+
+function renderMCQTest(test) {
+  const content = document.getElementById('mcq-test-content');
+  const questionsHTML = test.questions.map((q, i) => `
+    <div class="q-card-mcq" id="qcard-${i}">
+      <div class="q-text-mcq">
+        <span class="q-num-badge">${i+1}</span>
+        <span>${q.q}</span>
+      </div>
+      <div class="options-grid">
+        ${q.opts.map((opt, j) => `
+          <button class="option-btn" id="opt-${i}-${j}" onclick="selectOption(${i},${j})">
+            <span class="opt-letter-badge">${['A','B','C','D'][j]}</span>
+            ${escHtml(opt)}
+          </button>`).join('')}
+      </div>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div class="mcq-header">
+      <h2>📝 ${test.title}</h2>
+      <p>${test.subject} &nbsp;|&nbsp; ${test.questions.length} Questions</p>
+    </div>
+    <div class="mcq-name-wrap">
+      <div class="mcq-name-card">
+        <span>👤</span>
+        <input type="text" id="mcq-student-name" placeholder="Enter your name..." maxlength="40">
+      </div>
+    </div>
+    <div style="height:4px"></div>
+    ${questionsHTML}
+    <div class="mcq-submit-wrap">
+      <button class="mcq-submit-btn" onclick="submitMCQ()">Submit Test ✓</button>
+    </div>
+    <canvas id="cert-canvas" width="1000" height="700"></canvas>
+    <div style="height:20px"></div>`;
+}
+
+function selectOption(qIdx, optIdx) {
+  if (mcqState.submitted) return;
+  mcqState.answers[qIdx] = optIdx;
+  const test = MCQ_TESTS[mcqState.testId];
+  // Update UI
+  for (let j = 0; j < test.questions[qIdx].opts.length; j++) {
+    const btn = document.getElementById(`opt-${qIdx}-${j}`);
+    btn.classList.remove('selected');
+  }
+  document.getElementById(`opt-${qIdx}-${optIdx}`).classList.add('selected');
+}
+
+function submitMCQ() {
+  const name = document.getElementById('mcq-student-name')?.value.trim() || '';
+  if (!name) { toast('Please enter your name!', 'error'); return; }
+
+  const test = MCQ_TESTS[mcqState.testId];
+  const total = test.questions.length;
+  const attempted = Object.keys(mcqState.answers).length;
+
+  if (attempted < total) {
+    const unattempted = total - attempted;
+    if (!confirm(`${unattempted} question(s) unattempted. Submit anyway?`)) return;
+  }
+
+  mcqState.submitted = true;
+  mcqState.studentName = name;
+
+  // Show correct/wrong
+  let score = 0;
+  test.questions.forEach((q, i) => {
+    const selected = mcqState.answers[i];
+    for (let j = 0; j < q.opts.length; j++) {
+      const btn = document.getElementById(`opt-${i}-${j}`);
+      if (!btn) return;
+      btn.disabled = true;
+      if (j === q.ans) btn.classList.add('correct');
+      else if (j === selected && selected !== q.ans) btn.classList.add('wrong');
+    }
+    if (selected === q.ans) score++;
+  });
+
+  // Show scorecard
+  const pct = Math.round(score / total * 100);
+  let emoji, msg, color, bg;
+  if (pct >= 90) { emoji='🏆'; msg='Outstanding! Excellent work!'; color='#15803D'; bg='#DCFCE7'; }
+  else if (pct >= 75) { emoji='🌟'; msg='Great Job! Keep it up!'; color='#1D4ED8'; bg='#DBEAFE'; }
+  else if (pct >= 60) { emoji='😊'; msg='Good! Practice more!'; color='#B45309'; bg='#FEF3C7'; }
+  else if (pct >= 40) { emoji='📚'; msg='Keep trying! You can do it!'; color='#EA580C'; bg='#FFEDD5'; }
+  else { emoji='💡'; msg="Don't give up! Study & try again!"; color='#DC2626'; bg='#FEE2E2'; }
+
+  const scoreHTML = `
+    <div class="scorecard">
+      <div class="score-emoji">${emoji}</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:4px">👤 ${escHtml(name)}</div>
+      <div class="score-num" style="color:${color}">${score}<span style="font-size:24px;color:var(--muted)">/${total}</span></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">${score} correct out of ${total} (${pct}%)</div>
+      <div class="progress-wrap"><div class="progress-fill" id="score-bar" style="width:0%;background:${color}"></div></div>
+      <div class="score-msg" style="background:${bg};color:${color}">${msg}</div>
+      <button class="cert-btn" onclick="downloadCertificate()">🎓 Download Certificate</button>
+      <button class="cert-btn" style="background:linear-gradient(135deg,#1D4ED8,#7C3AED);margin-top:8px" onclick="showLeaderboard()">🏆 View Leaderboard</button>
+    </div>`;
+
+  // Save to leaderboard
+  saveToLeaderboard(name, score, total, pct, test.title);
+
+  const submitWrap = document.querySelector('.mcq-submit-wrap');
+  if (submitWrap) submitWrap.innerHTML = scoreHTML;
+  submitWrap?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => {
+    const bar = document.getElementById('score-bar');
+    if (bar) bar.style.width = pct + '%';
+  }, 300);
+}
+
+function downloadCertificate() {
+  const test = MCQ_TESTS[mcqState.testId];
+  const total = test.questions.length;
+  let score = 0;
+  test.questions.forEach((q, i) => { if (mcqState.answers[i] === q.ans) score++; });
+  const pct = Math.round(score / total * 100);
+  const name = mcqState.studentName || 'Student';
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+
+  let grade, gc, gradeEmoji;
+  if (pct >= 90) { grade='A+'; gc='#15803d'; gradeEmoji='🏆'; }
+  else if (pct >= 80) { grade='A'; gc='#1d4ed8'; gradeEmoji='🌟'; }
+  else if (pct >= 70) { grade='B+'; gc='#6d28d9'; gradeEmoji='😊'; }
+  else if (pct >= 60) { grade='B'; gc='#b45309'; gradeEmoji='👍'; }
+  else { grade='C'; gc='#b91c1c'; gradeEmoji='📚'; }
+
+  const cv = document.getElementById('cert-canvas');
+  const ctx = cv.getContext('2d');
+  const W = 1000, H = 700;
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, W, H);
+  bg.addColorStop(0, '#0f172a'); bg.addColorStop(0.5, '#1d4ed8'); bg.addColorStop(1, '#4c1d95');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // Circles
+  ctx.fillStyle = 'rgba(255,255,255,0.04)';
+  [[100,100,120],[W-80,80,100],[60,H-80,90],[W-120,H-100,130],[W/2,H/2,200]].forEach(([x,y,r]) => {
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  });
+
+  // Border
+  ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 8; ctx.strokeRect(24,24,W-48,H-48);
+  ctx.strokeStyle = 'rgba(251,191,36,0.35)'; ctx.lineWidth = 3; ctx.strokeRect(38,38,W-76,H-76);
+
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 36px Georgia,serif';
+  ctx.fillText('🎓  Certificate of Achievement', W/2, 90);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.65)';
+  ctx.font = '18px Georgia,serif';
+  ctx.fillText(`${test.title}  •  CA Intermediate`, W/2, 135);
+
+  ctx.strokeStyle = 'rgba(251,191,36,0.4)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(120,160); ctx.lineTo(W-120,160); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = 'italic 18px Georgia,serif';
+  ctx.fillText('This certifies that', W/2, 205);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 54px Georgia,serif';
+  ctx.fillText(name, W/2, 275);
+
+  const nw = ctx.measureText(name).width;
+  ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2-nw/2,290); ctx.lineTo(W/2+nw/2,290); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = 'italic 18px Georgia,serif';
+  ctx.fillText(`has successfully completed ${test.title}`, W/2, 335);
+
+  // Score box
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath(); ctx.roundRect(W/2-200,360,400,120,18); ctx.fill();
+  ctx.strokeStyle = 'rgba(251,191,36,0.45)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(W/2-200,360,400,120,18); ctx.stroke();
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 30px sans-serif';
+  ctx.fillText(`Score: ${score} / ${total}  (${pct}%)`, W/2, 410);
+
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText(`Grade: ${grade}  ${gradeEmoji}`, W/2, 460);
+
+  ctx.strokeStyle = 'rgba(251,191,36,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(120,540); ctx.lineTo(W-120,540); ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '15px sans-serif';
+  ctx.fillText(`Date: ${today}  •  Beyond Failure — CA Notes`, W/2, 575);
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 16px Georgia,serif';
+  ctx.fillText('★  Keep Learning, Keep Growing  ★', W/2, 635);
+
+  const a = document.createElement('a');
+  a.download = `Certificate_${name.replace(/ /g,'_')}_AS13.png`;
+  a.href = cv.toDataURL('image/png');
+  a.click();
+  toast('Certificate downloaded! 🎓', 'success');
+}
+
+// ══════════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════════
+async function saveToLeaderboard(name, score, total, percent, testName) {
+  try {
+    await fetch(LEADERBOARD_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'leaderboard', name, score, total, percent, test: testName })
+    });
+  } catch(e) { console.log('Leaderboard save error:', e); }
+}
+
+async function showLeaderboard() {
+  showScreen('leaderboard');
+  const content = document.getElementById('leaderboard-content');
+  content.innerHTML = `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Loading leaderboard...</div></div>`;
+  try {
+    const res = await fetch(LEADERBOARD_URL);
+    const data = await res.json();
+    if (!data || !data.length) {
+      content.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">🏆</div><div class="empty-title">No entries yet</div><div class="empty-sub">Be the first to take a test!</div></div>`;
+      return;
+    }
+    const sorted = data.sort((a,b) => b.percent - a.percent);
+    window._lbData = sorted;
+    const tests = [...new Set(data.map(d => d.test))];
+    const filterHTML = `<div class="leaderboard-filter">
+      <div class="lb-chip active" onclick="filterLeaderboard('All',this)">All</div>
+      ${tests.map(t => `<div class="lb-chip" onclick="filterLeaderboard('${t}',this)">${t.includes('AS-13') ? 'AS-13' : t}</div>`).join('')}
+    </div>`;
+    content.innerHTML = filterHTML + sorted.map((d,i) => lbCardHTML(d,i)).join('');
+  } catch(e) {
+    content.innerHTML = `<div class="empty-wrap"><div class="empty-emoji">⚠️</div><div class="empty-title">Could not load</div><div class="empty-sub">Check internet connection</div></div>`;
+  }
+}
+
+function filterLeaderboard(filter, el) {
+  document.querySelectorAll('.lb-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const filtered = filter === 'All' ? window._lbData : window._lbData.filter(d => d.test === filter);
+  const content = document.getElementById('leaderboard-content');
+  const filterEl = content.querySelector('.leaderboard-filter');
+  content.innerHTML = '';
+  if (filterEl) content.appendChild(filterEl);
+  content.insertAdjacentHTML('beforeend', filtered.map((d,i) => lbCardHTML(d,i)).join(''));
+}
+
+function lbCardHTML(d, i) {
+  const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'normal';
+  const rankIcon = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+  return `<div class="lb-card">
+    <div class="lb-rank ${rankClass}">${rankIcon}</div>
+    <div class="lb-info">
+      <div class="lb-name">${escHtml(d.name)}</div>
+      <div class="lb-meta">${d.score}/${d.total} correct • ${d.date || ''}</div>
+    </div>
+    <div class="lb-score">${d.percent}%</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════
+//  DARK MODE
+// ══════════════════════════════════════════════════
+function toggleDark() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('darkBtn').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.documentElement.setAttribute('data-theme', savedTheme);
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('darkBtn');
+  if (btn) btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+});
+
+// ══════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════
+window.addEventListener('popstate', () => {
+  if (state.screenHistory.length > 0) goBack();
+  else history.pushState(null, '');
+});
+history.pushState(null, '');
+
+// Load notes on start
+fetchNotes();
+</script>
+</body>
+</html>
